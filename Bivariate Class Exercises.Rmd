@@ -11,7 +11,6 @@ _____
 # Part 2: Visualizing Tabular data
 
 ### [Bivariate Case](https://github.com/EvansDataScience/VisualAnalytics_2_tabularDataBiv)
-
 _____
 
 Contents:
@@ -25,7 +24,6 @@ Contents:
 4. [Numerical-Numerical case.](#part4)
 
 **Exercises**: <br>
-
 - [Exercise 1](#ex1)
 - [Exercise 2](#ex2)
 - [Exercise 3](#ex3)
@@ -37,9 +35,15 @@ _____
 link="https://github.com/EvansDataScience/data/raw/master/crime.RData"
 load(file = url(link))
 
+#loading plugins
+library(ggplot2)  
+library(magrittr)
+library(ggrepel)
+
+library(Rmisc)
+library(tibble)
+
 ```
-
-
 _____
 
 [Go to table of contents.](#part1)
@@ -48,52 +52,34 @@ _____
 
 ## Categorical-Categorical relationships
 
+<a id='ex1'></a>
+<span style="color:red"> Exercise 1:<br> Turn the bars into lollipop with the right components.
+</span>
 
-```{r convertToDFgg,eval=FALSE}
-library(ggplot2)  
-library(magrittr)
-library(ggrepel)
-
-library(Rmisc)
-library(tibble)
-
-# table of proportion based on total, gives you panel data
+```{r }
+#data prep
+#table of proportion based on total, gives you panel data
 CrimeTotal=table(crime$crimecat,crime$Occurred.DayTime)%>% #create table and then...
         prop.table() %>% #compute proportion and then...
         "*"(100)%>% # multiply by 100 and then...
         round(2) #...round to to decimals
-
+#as data frame
 df.T=as.data.frame(CrimeTotal) 
-
 #renaming
 names(df.T)=c('Crime','Daytime','Percent') 
-
 #independent in columns, dependent in rows
 CrimeCol=table(crime$crimecat,crime$Occurred.DayTime)%>%
          prop.table(margin = 2)%>%   # 2 is % by column
          "*"(100)%>%
          round(3)
-
-
 crimeWeek=crime[(crime$DaysToReport<365) & (crime$year>=2000),]
-
 crimeWeek$WeeksToReport=crimeWeek$DaysToReport/7
-
 crimeYearGG2=crimeWeek[complete.cases(crimeWeek$WeeksToReport) &complete.cases(crimeWeek$crimecat),]
 
-
-
-```
-
-
-<a id='ex1'></a>
-<span style="color:red"> Exercise 1:<br> Turn the bars into lollipop with the right components.
-</span>
-
-```{r}
 titleText4 = 'What Crimes Are Being Committed, \nand When?'
 sourceText2= 'City of Seattle: Open Data Portal'
 
+#ggplot
 base  = ggplot(df.T, aes(x = reorder(Crime, Percent), y = Percent ) ) 
 
 lolliplot1=base + geom_segment(aes(y = 0,
@@ -118,7 +104,6 @@ lolliplot5 = lolliplot4 + scale_x_discrete()
 lolliplot6 = lolliplot5 + facet_wrap( ~ Daytime ,nrow = 1) 
 
 lolliplot6+ coord_flip()
-
 ```
 
 
@@ -126,7 +111,7 @@ lolliplot6+ coord_flip()
 <span style="color:red"> Exercise 2:<br> Change the heatplot to ascending order, where intensity goes from yellow to purple.
 </span>
 
-```{r heatDescending, eval=FALSE}
+```{r heatDescending}
 # heatplot
 base  = ggplot(df.T, aes(x = Daytime, y = reorder(Crime, Percent), fill = Percent)) 
 heat1 = base +  geom_tile() 
@@ -151,7 +136,7 @@ heat4 + labs(y="Crime",x="Time of Day", source=sourceText2, title='When Do Crime
 <span style="color:red"> Exercise 3:<br> Complete the information needed in the previous plots.
 </span>
 
-```{r byCrime, eval=FALSE}
+```{r byCrime}
 titleText5='How Many Years Does it Take \nfor a Crime to Be Reported?'
 
 #data prep
@@ -185,7 +170,7 @@ all5 = all4 + labs(title=titleText5,
 all5
 ```
 
-```{r byCrime2, eval=FALSE}
+```{r byCrime2}
 
 titleText6= 'How Many Weeks Does it Take \nfor a Crime to Be Reported?'
 
@@ -219,7 +204,7 @@ all5
 <span style="color:red"> Exercise 4:<br> Complete the elements missing in the previous plots.
 </span>
 
-```{r, eval=FALSE}
+```{r, }
 titleText7="Does a Neighborhood's Crime Rates Influence \nHow Long it Takes Residents to Report Crimes?"
 
 #data prep
@@ -253,7 +238,7 @@ plot3
 ```
 
 
-```{r hexbins, eval=FALSE}
+```{r hexbins}
 base = ggplot(num_num, aes(daysByNeigh,crimesByNeigh)) 
 scatp1 = base +  geom_hex(bins = 10)
 scatp2= scatp1 + geom_text_repel(aes(label=ifelse(crimesByNeigh>=5,
@@ -269,7 +254,7 @@ scatp4
 ```
 
 
-```{r density,eval=FALSE}
+```{r density}
 base = ggplot(num_num, aes(daysByNeigh,crimesByNeigh)) 
 scatp1 = base +  stat_density_2d(aes(fill = ..density..), 
                                  geom = "raster", contour = FALSE)
